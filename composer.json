@@ -1,0 +1,22 @@
+{
+    "name": "aladin/blog-rest-api",
+    "description": "Blog posts REST API",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "BlogRestApi\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Aladin Hadzic",
+            "email": "aladinhadziic@gmail.com"
+        }
+    ],
+    "require": {
+        "ext-pdo": "*",
+        "league/route": "^5.1",
+        "laminas/laminas-diactoros": "^2.24",
+        "laminas/laminas-httphandlerrunner": "^2.5"
+    }
+}
