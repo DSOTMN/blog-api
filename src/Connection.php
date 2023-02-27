@@ -3,7 +3,7 @@
 namespace BlogRestApi;
 use PDO;
 
-class connection{
+class Connection{
     public static function connect():PDO
     {
         $dsn = 'mysql:dbname=blog_api;host=localhost';

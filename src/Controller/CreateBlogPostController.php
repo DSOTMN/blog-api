@@ -2,8 +2,8 @@
 
 namespace BlogRestApi\Controller;
 
-use BlogRestApi\Blog\CreateBlogPost;
-use BlogRestApi\connection;
+use BlogRestApi\Connection;
+use BlogRestApi\Repository\PostRepository\PostRepositoryPdo;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -12,10 +12,10 @@ class CreateBlogPostController
 {
     public function __invoke(ServerRequestInterface $request):ResponseInterface
     {
-        $connection = connection::connect();
-        $newPost = new CreateBlogPost($connection);
+        $connection = Connection::connect();
+        $newPost = new PostRepositoryPdo($connection);
         $data = json_decode($request->getBody()->getContents(), true);
-        $id = $newPost->create($data);
+        $id = $newPost->store($data);
 
         $res = [
             'status' => 'success',
