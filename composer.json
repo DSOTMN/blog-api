@@ -17,6 +17,9 @@
         "ext-pdo": "*",
         "league/route": "^5.1",
         "laminas/laminas-diactoros": "^2.24",
-        "laminas/laminas-httphandlerrunner": "^2.5"
+        "laminas/laminas-httphandlerrunner": "^2.5",
+        "slim/slim": "4.*",
+        "slim/psr7": "^1.6",
+        "php-di/slim-bridge": "^3.3"
     }
 }
