@@ -8,4 +8,5 @@ interface PostRepository
     public function get(string $id):array;
     public function all():array;
     public function remove(string $id):string;
+    public function update(string $id, array $args):string;
 }

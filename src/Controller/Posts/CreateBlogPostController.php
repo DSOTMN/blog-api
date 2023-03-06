@@ -19,7 +19,7 @@ class CreateBlogPostController
      * @throws DependencyException
      * @throws NotFoundException
      */
-    public function __construct(Private Container $container)
+    public function __construct(private Container $container)
     {
         $this->pdo = $container->get('db');
     }

@@ -58,4 +58,18 @@ class PostRepositoryPdo implements PostRepository
         $stmt->execute();
         return "$id deleted";
     }
+
+    public function update(string $id, array $data): string
+    {
+        $stmt = $this->connection->prepare('UPDATE posts SET title=:title, content=:content, thumbnail=:thumbnail WHERE id=:id');
+
+        $stmt->execute([
+            ':title' => $data['title'],
+            ':content' => $data['content'],
+            ':thumbnail' => $data['thumbnail'],
+            ':id' => $id,
+        ]);
+
+        return "Post: successfully updated";
+    }
 }
