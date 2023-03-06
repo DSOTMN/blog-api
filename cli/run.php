@@ -1,12 +1,10 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
+$container = require __DIR__ . '/../container/container.php';
 
-use BlogRestApi\connection;
+/** @var PDO $pdo */
+$pdo = $container->get('db');
 
-$pdo = connection::connect();
-
-$file = __DIR__ . '/db.sql';
-$sql = file_get_contents($file);
-$pdo->query($sql);
-
+$sql = file_get_contents(__DIR__ . '/db.sql');
+$pdo->exec($sql);
 echo "All done!";

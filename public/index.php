@@ -1,27 +1,29 @@
 <?php
 include __DIR__ . '/../vendor/autoload.php';
 
-use BlogRestApi\Controller\CreateBlogPostController;
-use BlogRestApi\Controller\GetAllPostsController;
-use BlogRestApi\Controller\GetBlogPostController;
-use League\Route\Router;
-use Laminas\Diactoros\ServerRequestFactory;
+use BlogRestApi\Controller\HomeController;
+use BlogRestApi\Controller\Posts\CreateBlogPostController;
+use BlogRestApi\Controller\Posts\DeleteSinglePostController;
+use BlogRestApi\Controller\Posts\GetAllPostsController;
+use BlogRestApi\Controller\Posts\GetSinglePostController;
+use BlogRestApi\Controller\Posts\UpdateBlogPostController;
+use DI\Bridge\Slim\Bridge;
 
+$container = require __DIR__ . '/../container/container.php';
+//AppFactory::setContainer($container);
+//$app = AppFactory::create();
 
-$request = ServerRequestFactory::fromGlobals(
-    $_SERVER, $_GET, $_POST, $_COOKIE, $_FILES
-);
+$app = Bridge::create($container);
 
-$router = new Router;
-// get single i get all posts možeš unutar jedne klase staviti
-//create post
-$router->post('/v1/blog/post/create', CreateBlogPostController::class);
-//get post
-$router->get('/v1/blog/post/{id}', GetBlogPostController::class);
-//get all posts
-$router->get('/v1/blog/posts', GetAllPostsController::class);
+$app->get('/', HomeController::class);
 
-$response = $router->dispatch($request);
+// Posts
+$app->post('/v1/blog/posts/create', CreateBlogPostController::class);
+$app->get('/v1/blog/posts', GetAllPostsController::class);
+$app->get('/v1/blog/post/{id}', GetSinglePostController::class);
+$app->delete('/v1/blog/post/delete/{id}', DeleteSinglePostController::class);
+$app->put('/v1/blog/post/update/{id}', UpdateBlogPostController::class);
 
-// send the response to the browser
-(new Laminas\HttpHandlerRunner\Emitter\SapiEmitter)->emit($response);
+$app->addErrorMiddleware(true, true, true);
+
+$app->run();
