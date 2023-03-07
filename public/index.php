@@ -23,18 +23,18 @@ $app = Bridge::create($container);
 $app->get('/', HomeController::class);
 
 // Posts
-$app->post('/v1/blog/posts/create', CreateBlogPostController::class);
+$app->post('/v1/blog/posts', CreateBlogPostController::class);
 $app->get('/v1/blog/posts', GetAllPostsController::class);
-$app->get('/v1/blog/post/{id}', GetSinglePostController::class);
-$app->delete('/v1/blog/post/delete/{id}', DeleteSinglePostController::class);
-$app->put('/v1/blog/post/update/{id}', UpdateBlogPostController::class);
+$app->get('/v1/blog/posts/{id}', GetSinglePostController::class);
+$app->delete('/v1/blog/posts/{id}', DeleteSinglePostController::class);
+$app->put('/v1/blog/posts/{id}', UpdateBlogPostController::class);
 
 // Categories
-$app->post('/v1/blog/categories/create', CreateCategoryController::class);
-$app->get('/v1/blog/categories/', GetAllCategoriesController::class);
+$app->post('/v1/blog/categories', CreateCategoryController::class);
+$app->get('/v1/blog/categories', GetAllCategoriesController::class);
 $app->get('/v1/blog/categories/{id}', GetSingleCategoryController::class);
-$app->delete('/v1/blog/categories/delete/{id}', DeleteSingleCategoryController::class);
-$app->put('/v1/blog/categories/update/{id}', UpdateCategoryController::class);
+$app->delete('/v1/blog/categories/{id}', DeleteSingleCategoryController::class);
+$app->put('/v1/blog/categories/{id}', UpdateCategoryController::class);
 
 $app->addErrorMiddleware(true, true, true);
 
