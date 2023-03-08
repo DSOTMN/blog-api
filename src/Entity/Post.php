@@ -12,7 +12,8 @@ class Post
         private string $content,
         private string $thumbnail,
         private string $author,
-        private mixed $postedAt = NULL
+        private mixed $postedAt = NULL,
+        private readonly mixed $category
     )
     {
     }
@@ -41,11 +42,21 @@ class Post
     {
         return $this->author;
     }
+
+    /**
+     * @throws \Exception
+     */
     public function postedAt():\DateTimeImmutable
     {
         if(is_string($this->postedAt)){
             return new DateTimeImmutable($this->postedAt);
         }
         return new DateTimeImmutable("now");
+    }
+
+    // TO_DO: make it plural, to contain array of categories
+    public function category(): mixed
+    {
+        return $this->category;
     }
 }

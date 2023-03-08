@@ -2,6 +2,8 @@
 
 namespace BlogRestApi\Controller\Posts;
 
+use BlogRestApi\Entity\Post;
+use BlogRestApi\Repository\PostCategoryRepository\PostCategoryRepositoryPdo;
 use BlogRestApi\Repository\PostRepository\PostRepositoryPdo;
 use DI\DependencyException;
 use DI\NotFoundException;
@@ -26,9 +28,23 @@ class CreateBlogPostController
 
     public function __invoke(ServerRequestInterface $request):ResponseInterface
     {
-        $newPost = new PostRepositoryPdo($this->pdo);
+        $postRepo = new PostRepositoryPdo($this->pdo);
+        $postCategoryRepo = new PostCategoryRepositoryPdo($this->pdo);
         $data = json_decode($request->getBody()->getContents(), true);
-        $id = $newPost->store($data);
+        $id = uniqid('post_');
+        $post = new Post(
+            $id,
+            $data['name'],
+            $data['slug'],
+            $data['content'],
+            $data['thumbnail'],
+            $data['author'],
+            NULL,
+            $data['category']
+        );
+
+        $id = $postRepo->store($post);
+        $cat = $postCategoryRepo->store($post);
 
         $res = [
             'status' => 'success',
@@ -36,6 +52,8 @@ class CreateBlogPostController
                 'id' => $id
             ]
         ];
+
+        // NAPRAVI RESPONSE DA JE LIJEP I PRIKAZUJE SVE PODATKE!
 
         return new JsonResponse($res, 201);
     }
