@@ -2,6 +2,8 @@
 
 namespace BlogRestApi\Controller\Posts;
 
+use BlogRestApi\Entity\Post;
+use BlogRestApi\Repository\PostCategoryRepository\PostCategoryRepositoryPdo;
 use BlogRestApi\Repository\PostRepository\PostRepositoryPdo;
 use DI\DependencyException;
 use DI\NotFoundException;
@@ -24,19 +26,43 @@ class CreateBlogPostController
         $this->pdo = $container->get('db');
     }
 
+    /**
+     * @throws \Exception
+     */
     public function __invoke(ServerRequestInterface $request):ResponseInterface
     {
-        $newPost = new PostRepositoryPdo($this->pdo);
+        $postRepo = new PostRepositoryPdo($this->pdo);
+        $postCategoryRepo = new PostCategoryRepositoryPdo($this->pdo);
         $data = json_decode($request->getBody()->getContents(), true);
-        $id = $newPost->store($data);
+        $id = uniqid('post_');
+        $post = new Post(
+            $id,
+            $data['name'],
+            $data['slug'],
+            $data['content'],
+            $data['thumbnail'],
+            $data['author'],
+            NULL,
+            $data['category']
+        );
+
+        $id = $postRepo->store($post);
+        $cat = $postCategoryRepo->store($post);
 
         $res = [
             'status' => 'success',
             'data' => [
-                'id' => $id
-            ]
+                'id' => $id,
+                'name' => $data['name'],
+                'slug' => $data['slug'],
+                'content' => $data['content'],
+                'thumbnail' => $data['thumbnail'],
+                'author' => $data['author'],
+                'posted_at' => $post->postedAt()->format('Y-m-d H:i:s'),
+                'category' => $cat
+            ],
+            'status_code' => 201
         ];
-
         return new JsonResponse($res, 201);
     }
 }

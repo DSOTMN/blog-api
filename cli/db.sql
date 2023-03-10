@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS posts(
-    id VARCHAR(255) NOT NULL PRIMARY KEY,
+    post_id VARCHAR(255) NOT NULL PRIMARY KEY,
     title VARCHAR(50) NOT NULL,
     slug VARCHAR(50) NOT NULL,
     content VARCHAR(300) NOT NULL,
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS posts(
 );
 
 CREATE TABLE IF NOT EXISTS categories(
-    id VARCHAR(255) NOT NULL PRIMARY KEY,
+    category_id VARCHAR(255) NOT NULL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     description VARCHAR(50)
 );
@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS categories(
 CREATE TABLE IF NOT EXISTS posts_categories(
     id_post VARCHAR(255) NOT NULL,
     id_category VARCHAR(255) NOT NULL,
-    FOREIGN KEY(id_post) REFERENCES posts(id) ON DELETE CASCADE,
-    FOREIGN KEY(id_category) REFERENCES categories(id) ON DELETE CASCADE,
+    FOREIGN KEY(id_post) REFERENCES posts(post_id) ON DELETE CASCADE,
+    FOREIGN KEY(id_category) REFERENCES categories(category_id) ON DELETE CASCADE,
     PRIMARY KEY(id_post, id_category)
 );
 
