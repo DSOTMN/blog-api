@@ -15,13 +15,10 @@ class PostCategoryRepositoryPdo implements PostCategoryRepository
     {
         $stmt = $this->pdo->prepare('INSERT INTO posts_categories VALUES(:id_post, :id_category)');
 
-        var_dump($post->category());
-
         $stmt->execute([
             ':id_post' => $post->id(),
-            ':id_category' => $post->category()
+            ':id_category' => $post->categories()
         ]);
-
-        return "I have no idea if this will work";
+        return $post->categories();
     }
 }

@@ -12,7 +12,10 @@ class PostRepositoryPdo implements PostRepository
 
     public function store(Post $post): string
     {
-        $stmt = $this->connection->prepare('INSERT INTO posts VALUES(:id, :title, :slug, :content, :thumbnail, :author, :posted_at)');
+        $stmt = $this->connection->prepare(<<<SQL
+            INSERT INTO posts 
+            VALUES(:id, :title, :slug, :content, :thumbnail, :author, :posted_at)
+            SQL);
 
         $stmt->execute([
             ':id' => $post->id(),
@@ -39,15 +42,33 @@ class PostRepositoryPdo implements PostRepository
     {
         //$stmt = $this->connection->query('SELECT * FROM posts');
         $stmt = $this->connection->query(<<<SQL
-        SELECT posts.*, posts_categories.* FROM posts_categories
+        SELECT posts.*, categories.*, posts_categories.* FROM posts_categories
         JOIN categories
-        ON posts_categories.id_category = categories.id
+        ON posts_categories.id_category = categories.category_id
         JOIN posts
-        ON posts_categories.id_post = posts.id                 
+        ON posts_categories.id_post = posts.post_id                 
         SQL);
 
+
         $stmt->execute();
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $posts = $stmt->fetchAll(\PDO::FETCH_BOTH);
+        $postCollection = [];
+        foreach($posts as $row){
+            $postCollection[] = [
+                'id' => $row['post_id'],
+                'title' => $row['title'],
+                'slug' => $row['slug'],
+                'content' => $row['content'],
+                'thumbnail' => $row['thumbnail'],
+                'author' => $row['author'],
+                'posted_at' => $row['posted_at'],
+                'categories' => [
+                    'id' => $row['id_category'],
+                    'name' => $row['name']
+                ],
+            ];
+        }
+        return $postCollection;
     }
 
     public function remove(string $id): string

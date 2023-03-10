@@ -13,7 +13,8 @@ class Post
         private string $thumbnail,
         private string $author,
         private mixed $postedAt = NULL,
-        private readonly mixed $category
+        /** @param Category[] $categories */
+        private readonly mixed $categories
     )
     {
     }
@@ -54,9 +55,9 @@ class Post
         return new DateTimeImmutable("now");
     }
 
-    // TO_DO: make it plural, to contain array of categories
-    public function category(): mixed
+    /** @return Category[] */
+    public function categories(): mixed
     {
-        return $this->category;
+        return $this->categories;
     }
 }

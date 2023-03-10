@@ -26,6 +26,9 @@ class CreateBlogPostController
         $this->pdo = $container->get('db');
     }
 
+    /**
+     * @throws \Exception
+     */
     public function __invoke(ServerRequestInterface $request):ResponseInterface
     {
         $postRepo = new PostRepositoryPdo($this->pdo);
@@ -49,12 +52,17 @@ class CreateBlogPostController
         $res = [
             'status' => 'success',
             'data' => [
-                'id' => $id
-            ]
+                'id' => $id,
+                'name' => $data['name'],
+                'slug' => $data['slug'],
+                'content' => $data['content'],
+                'thumbnail' => $data['thumbnail'],
+                'author' => $data['author'],
+                'posted_at' => $post->postedAt()->format('Y-m-d H:i:s'),
+                'category' => $cat
+            ],
+            'status_code' => 201
         ];
-
-        // NAPRAVI RESPONSE DA JE LIJEP I PRIKAZUJE SVE PODATKE!
-
         return new JsonResponse($res, 201);
     }
 }
