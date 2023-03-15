@@ -3,7 +3,6 @@
 namespace BlogRestApi\Repository\PostCategoryRepository;
 
 use BlogRestApi\Entity\Post;
-use BlogRestApi\Entity\Category;
 
 class PostCategoryRepositoryPdo implements PostCategoryRepository
 {
@@ -11,7 +10,7 @@ class PostCategoryRepositoryPdo implements PostCategoryRepository
     {
     }
 
-    public function store(Post $post): string
+    public function store(Post $post): mixed
     {
         $stmt = $this->pdo->prepare('INSERT INTO posts_categories VALUES(:id_post, :id_category)');
 

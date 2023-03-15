@@ -1,6 +1,4 @@
 <?php
-include __DIR__ . '/../vendor/autoload.php';
-
 use BlogRestApi\Controller\Categories\CreateCategoryController;
 use BlogRestApi\Controller\Categories\DeleteSingleCategoryController;
 use BlogRestApi\Controller\Categories\GetAllCategoriesController;
@@ -14,6 +12,8 @@ use BlogRestApi\Controller\Posts\GetSinglePostController;
 use BlogRestApi\Controller\Posts\UpdateBlogPostController;
 use DI\Bridge\Slim\Bridge;
 
+require __DIR__ . '/../boot.php';
+
 $container = require __DIR__ . '/../container/container.php';
 //AppFactory::setContainer($container);
 //$app = AppFactory::create();
@@ -21,13 +21,14 @@ $container = require __DIR__ . '/../container/container.php';
 $app = Bridge::create($container);
 
 $app->get('/', HomeController::class);
+$app->addBodyParsingMiddleware();
 
 // Posts
 $app->post('/v1/blog/posts', CreateBlogPostController::class);
 $app->get('/v1/blog/posts', GetAllPostsController::class);
 $app->get('/v1/blog/posts/{id}', GetSinglePostController::class);
 $app->delete('/v1/blog/posts/{id}', DeleteSinglePostController::class);
-$app->put('/v1/blog/posts/{id}', UpdateBlogPostController::class);
+$app->post('/v1/blog/posts/update/{id}', UpdateBlogPostController::class);
 
 // Categories
 $app->post('/v1/blog/categories', CreateCategoryController::class);
@@ -37,5 +38,6 @@ $app->delete('/v1/blog/categories/{id}', DeleteSingleCategoryController::class);
 $app->put('/v1/blog/categories/{id}', UpdateCategoryController::class);
 
 $app->addErrorMiddleware(true, true, true);
+
 
 $app->run();
