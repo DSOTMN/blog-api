@@ -53,7 +53,6 @@ class PostRepositoryPdo implements PostRepository
             'author' => $result['author'],
             'posted_at' => $result['posted_at'],
             'categories' => [
-
                 'id' => $result['category_id'],
                 'name' => $result['name'],
             ]
@@ -70,8 +69,6 @@ class PostRepositoryPdo implements PostRepository
         JOIN posts
         ON posts_categories.id_post = posts.post_id                 
         SQL);
-
-
 
         $stmt->execute();
 
@@ -92,26 +89,6 @@ class PostRepositoryPdo implements PostRepository
                 ]
             ];
         }
-
-        /*
-        $posts = $stmt->fetchAll(\PDO::FETCH_BOTH);
-        $postCollection = [];
-        foreach($posts as $row){
-            $postCollection[] = [
-                'id' => $row['post_id'],
-                'title' => $row['title'],
-                'slug' => $row['slug'],
-                'content' => $row['content'],
-                'thumbnail' => $row['thumbnail'],
-                'author' => $row['author'],
-                'posted_at' => $row['posted_at'],
-                'categories' => [
-                    'id' => $row['id_category'],
-                    'name' => $row['name']
-                ],
-            ];
-        }
-        */
         return $posts;
     }
 

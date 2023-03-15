@@ -2,6 +2,7 @@
 
 namespace BlogRestApi\Entity;
 use DateTimeImmutable;
+use Slim\Psr7\UploadedFile;
 
 class Post
 {
@@ -10,11 +11,12 @@ class Post
         private string $title,
         private string $slug,
         private string $content,
+        //private UploadedFile $thumbnail,
         private string $thumbnail,
         private string $author,
         private mixed $postedAt = NULL,
         /** @param Category[] $categories */
-        private readonly mixed $categories
+        private mixed $categories
     )
     {
     }

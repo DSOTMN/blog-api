@@ -33,7 +33,7 @@ class CategoryRepositoryPdo implements CategoryInterface
 
     public function get(string $id): array
     {
-        $stmt = $this->connection->prepare('SELECT * FROM categories WHERE id=:id');
+        $stmt = $this->connection->prepare('SELECT * FROM categories WHERE category_id=:id');
         $stmt->bindParam(':id', $id);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
