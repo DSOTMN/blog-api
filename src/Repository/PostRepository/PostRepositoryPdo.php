@@ -30,7 +30,7 @@ class PostRepositoryPdo implements PostRepository
         return $post->id();
     }
 
-    public function get($id): array
+    public function get(string $slug): array
     {
         $stmt = $this->connection->prepare(<<<SQL
             SELECT posts.*, categories.*
@@ -39,11 +39,16 @@ class PostRepositoryPdo implements PostRepository
             ON posts_categories.id_category = categories.category_id
             LEFT JOIN posts
             ON posts_categories.id_post = posts.post_id
-            WHERE posts.post_id = :id
+            WHERE posts.slug = :slug
         SQL);
-        $stmt->bindParam(':id', $id);
+        $stmt->bindParam(':slug', $slug);
         $stmt->execute();
+
         $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        if(!$result){
+            return $post = [];
+        }
+
         return [
             'id' => $result['post_id'],
             'title' => $result['title'],
@@ -61,7 +66,6 @@ class PostRepositoryPdo implements PostRepository
 
     public function all(): array
     {
-        //$stmt = $this->connection->query('SELECT * FROM posts');
         $stmt = $this->connection->query(<<<SQL
         SELECT posts.*, categories.*, posts_categories.* FROM posts_categories
         JOIN categories
@@ -92,25 +96,22 @@ class PostRepositoryPdo implements PostRepository
         return $posts;
     }
 
-    public function remove(string $id): string
+    public function delete(string $slug): void
     {
-        $stmt = $this->connection->prepare('DELETE FROM posts WHERE post_id=:id');
-        $stmt->bindParam(':id', $id);
+        $stmt = $this->connection->prepare('DELETE FROM posts WHERE slug=:slug');
+        $stmt->bindParam(':slug', $slug);
         $stmt->execute();
-        return "$id deleted";
     }
 
-    public function update(string $id, array $data): string
+    public function update(string $slug, array $data): void
     {
-        $stmt = $this->connection->prepare('UPDATE posts SET title=:title, content=:content, thumbnail=:thumbnail WHERE post_id=:id');
+        $stmt = $this->connection->prepare('UPDATE posts SET title=:title, content=:content, thumbnail=:thumbnail WHERE slug=:slug');
 
         $stmt->execute([
             ':title' => $data['title'],
             ':content' => $data['content'],
             ':thumbnail' => $data['thumbnail'],
-            ':id' => $id,
+            ':slug' => $slug,
         ]);
-
-        return "Post: successfully updated";
     }
 }

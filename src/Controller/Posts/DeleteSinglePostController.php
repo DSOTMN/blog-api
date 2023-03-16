@@ -24,16 +24,17 @@ class DeleteSinglePostController
         $this->pdo = $container->get('db');
     }
 
-    public function __invoke(ServerRequestInterface $request, string $id): ResponseInterface
+    public function __invoke(ServerRequestInterface $request, string $slug): ResponseInterface
     {
         $repository = new PostRepositoryPdo($this->pdo);
-        $repository->remove($id);
+        $post = $repository->get($slug);
+        $repository->delete($slug);
 
         $data = [
-            'Status' => 'Successfully deleted post',
-            'id' => $id
+            'status' => 'successfully deleted post',
+            'post-id' => $post['id']
         ];
 
-        return new JsonResponse($data);
+        return new JsonResponse($data, 200);
     }
 }

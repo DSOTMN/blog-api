@@ -9,6 +9,6 @@ interface PostRepository
     public function store(Post $post):string;
     public function get(string $id):array;
     public function all():array;
-    public function remove(string $id):string;
-    public function update(string $id, array $args):string;
+    public function delete(string $id):void;
+    public function update(string $id, array $args):void;
 }

@@ -26,9 +26,9 @@ $app->addBodyParsingMiddleware();
 // Posts
 $app->post('/v1/blog/posts', CreateBlogPostController::class);
 $app->get('/v1/blog/posts', GetAllPostsController::class);
-$app->get('/v1/blog/posts/{id}', GetSinglePostController::class);
-$app->delete('/v1/blog/posts/{id}', DeleteSinglePostController::class);
-$app->post('/v1/blog/posts/update/{id}', UpdateBlogPostController::class);
+$app->get('/v1/blog/posts/{slug}', GetSinglePostController::class);
+$app->delete('/v1/blog/posts/{slug}', DeleteSinglePostController::class);
+$app->post('/v1/blog/posts/update/{slug}', UpdateBlogPostController::class);
 
 // Categories
 $app->post('/v1/blog/categories', CreateCategoryController::class);
