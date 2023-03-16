@@ -18,10 +18,14 @@ class GetSinglePostController
         $this->pdo = $container->get('db');
     }
 
-    public function __invoke(ServerRequestInterface $request, string $id):ResponseInterface
+    public function __invoke(ServerRequestInterface $request, string $slug):ResponseInterface
     {
         $findPost = new PostRepositoryPdo($this->pdo);
-        $data = $findPost->get($id);
+        $data = $findPost->get($slug);
+
+        if(!$data){
+            return new JsonResponse(["message" => "Post not found. Try something else.", "status_code" => 404], 404);
+        }
 
         return new JsonResponse($data, 201);
     }

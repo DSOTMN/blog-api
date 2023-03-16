@@ -48,7 +48,7 @@ class CategoryRepositoryPdo implements CategoryInterface
 
     public function delete(string $id): string
     {
-        $stmt = $this->connection->prepare('DELETE FROM categories WHERE id=:id');
+        $stmt = $this->connection->prepare('DELETE FROM categories WHERE category_id=:id');
         $stmt->bindParam(':id', $id);
         $stmt->execute();
         return $id;
@@ -56,7 +56,7 @@ class CategoryRepositoryPdo implements CategoryInterface
 
     public function update(string $id, array $data):void
     {
-        $stmt = $this->connection->prepare('UPDATE categories SET name=:name, description=:description WHERE id=:id');
+        $stmt = $this->connection->prepare('UPDATE categories SET name=:name, description=:description WHERE category_id=:id');
 
         $stmt->execute([
             ':name' => $data['name'],

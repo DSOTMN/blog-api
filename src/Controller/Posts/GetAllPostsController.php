@@ -29,6 +29,10 @@ class GetAllPostsController
         $posts = new PostRepositoryPdo($this->pdo);
         $data = $posts->all();
 
+        if(!$data){
+            return new JsonResponse(["message" => "No posts found. Create some first.", "status_code" => 404], 404);
+        }
+
         return new JsonResponse($data, 201);
     }
 }

@@ -23,21 +23,21 @@ class UpdateBlogPostController
         $this->baseUrl = $container->get('settings')['app']['domain'];
     }
 
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, string $id):ResponseInterface
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, string $slug):ResponseInterface
     {
         $data = $request->getParsedBody();
         $repository = new PostRepositoryPdo($this->pdo);
 
-        $post = $repository->get($id);
+        $post = $repository->get($slug);
         $uploadedFiles = $request->getUploadedFiles();
 
         if (!$post) {
             return new JsonResponse("Post not found, try again.", 404);
         }
-
         if (!$data['title'] || !$data['content'] || !$uploadedFiles) {
             return new JsonResponse("Bad input. Try again!", 400);
         }
+
         // handle single input with single file upload
         $uploadedFile = $uploadedFiles['thumbnail'];
         if ($uploadedFile->getError() === UPLOAD_ERR_OK) {
@@ -47,11 +47,11 @@ class UpdateBlogPostController
 
         $data['thumbnail'] = $this->baseUrl . 'uploads/' . $filename;
 
-        $repository->update($id, $data);
+        $repository->update($slug, $data);
         $res = [
             'status' => 'success',
             'data' => [
-                "id" => $id,
+                "id" => $post['id'],
                 "title" => $data['title'],
 	            "content" => $data['content'],
 	            "thumbnail" => $data['thumbnail']
@@ -71,7 +71,7 @@ class UpdateBlogPostController
      *
      * @return string The filename of moved file
      */
-    function moveUploadedFile(string $directory, UploadedFileInterface $uploadedFile): string
+    private function moveUploadedFile(string $directory, UploadedFileInterface $uploadedFile): string
     {
         $extension = pathinfo($uploadedFile->getClientFilename(), PATHINFO_EXTENSION);
 
