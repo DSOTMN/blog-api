@@ -36,7 +36,14 @@ class CategoryRepositoryPdo implements CategoryInterface
         $stmt = $this->connection->prepare('SELECT * FROM categories WHERE category_id=:id');
         $stmt->bindParam(':id', $id);
         $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $category = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if(!$category){
+            return [];
+        }
+
+        return $category;
     }
 
     public function all(): array

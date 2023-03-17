@@ -9,6 +9,49 @@ use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
+use OpenApi\Annotations as OA;
+
+/**
+ * @OA\Post(
+ *     path="/v1/blog/posts/update/{slug}",
+ *     description="Updates a single post by its slug",
+ *     tags={"Blog Posts"},
+ *     @OA\Parameter(
+ *         description="Slug of the post to update",
+ *         in="path",
+ *         name="slug",
+ *         example="post-slug",
+ *         required=true,
+ *         @OA\Schema(
+ *             type="string"
+ *         )
+ *     ),
+ *     @OA\RequestBody(
+ *          description="Updating a single post.",
+ *          required=true,
+ *          @OA\MediaType(
+ *              mediaType="multipart/form-data",
+ *              @OA\Schema(
+ *                  @OA\Property(property="title", type="string", example="My New Blog Post"),
+ *                  @OA\Property(property="content", type="string", example="Lorem Ipsum Dolorem"),
+ *                  @OA\Property(property="thumbnail", type="string"),
+ *              )
+ *          )
+ *     ),
+ *     @OA\Response(
+ *         response="200",
+ *         description="Updates single post properties."
+ *     ),
+ *     @OA\Response(
+ *         response="400",
+ *         description="Invalid input."
+ *     ),
+ *     @OA\Response(
+ *         response="404",
+ *         description="Post with the given parameter not found."
+ *     )
+ * )
+ */
 
 class UpdateBlogPostController
 {
@@ -23,10 +66,11 @@ class UpdateBlogPostController
         $this->baseUrl = $container->get('settings')['app']['domain'];
     }
 
-    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, string $slug):ResponseInterface
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $args):ResponseInterface
     {
         $data = $request->getParsedBody();
         $repository = new PostRepositoryPdo($this->pdo);
+        $slug = $args['slug'];
 
         $post = $repository->get($slug);
         $uploadedFiles = $request->getUploadedFiles();

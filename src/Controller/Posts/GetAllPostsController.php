@@ -10,7 +10,19 @@ use Laminas\Diactoros\Response\JsonResponse;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use OpenApi\Annotations as OA;
 
+/**
+ * @OA\Get(
+ *     path="/v1/blog/posts",
+ *     description="All blog posts saved.",
+ *     tags={"Blog Posts"},
+ *     @OA\Response(
+ *         response="200",
+ *         description="Returns the list of all blog posts."
+ *     )
+ * )
+ */
 class GetAllPostsController
 {
     private PDO $pdo;

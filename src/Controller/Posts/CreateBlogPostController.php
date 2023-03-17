@@ -3,18 +3,58 @@
 namespace BlogRestApi\Controller\Posts;
 
 use BlogRestApi\Entity\Post;
+use BlogRestApi\Repository\CategoryRepository\CategoryRepositoryPdo;
 use BlogRestApi\Repository\PostCategoryRepository\PostCategoryRepositoryPdo;
 use BlogRestApi\Repository\PostRepository\PostRepositoryPdo;
 use Cocur\Slugify\Slugify;
 use DI\DependencyException;
 use DI\NotFoundException;
+use JsonException;
 use Laminas\Diactoros\Response\JsonResponse;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use DI\Container;
 use Psr\Http\Message\UploadedFileInterface;
+use OpenApi\Annotations as OA;
 
+/**
+ * @OA\Post(
+ *     path="/v1/blog/posts",
+ *     description="Create a new blog post.",
+ *     tags={"Blog Posts"},
+ *     @OA\RequestBody(
+ *          description="Post to be created",
+ *          required=true,
+ *          @OA\MediaType(
+ *              mediaType="multipart/form-data",
+ *              @OA\Schema(
+ *                  @OA\Property(property="title", type="string", example="My New Blog Post"),
+ *                  @OA\Property(property="content", type="string", example="Lorem Ipsum Dolorem"),
+ *                  @OA\Property(property="thumbnail", type="string"),
+ *                  @OA\Property(property="author", type="string", example="My Name"),
+ *                  @OA\Property(property="categories", type="array",
+ *                         @OA\Items(
+ *                         type="object",
+ *                         @OA\Property(property="id", type="string", format="uniqid")
+ *                     )
+ *                   ),
+ *              )
+ *          )
+ *     ),
+ *     @OA\Response(
+ *         response="201",
+ *         description="Post Created Successfully",
+ *         @OA\MediaType(
+ *             mediaType="application/json"
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response="400",
+ *         description="Bad Request"
+ *     )
+ * )
+ */
 class CreateBlogPostController
 {
     private PDO $pdo;
@@ -40,8 +80,17 @@ class CreateBlogPostController
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response):ResponseInterface
     {
         $postCategoryRepo = new PostCategoryRepositoryPdo($this->pdo);
+        $categoryRepo = new CategoryRepositoryPdo($this->pdo);
         $data = $request->getParsedBody();
-        $id = uniqid('post_');
+        $foundCategory = $categoryRepo->get($data['categories']);
+        if(!$foundCategory){
+            return new JsonResponse([
+                "status" => "failed",
+                "message" => "Category does not exist. Try something else.",
+                "status-code" => 404
+            ], 404);
+        }
+
 
         if($this->duplicatedTitle($this->postRepository, $data['title'])){
             return new JsonResponse([
@@ -50,10 +99,6 @@ class CreateBlogPostController
                 "status-code" => "400"
             ], 400);
         }
-
-        // create slug out of the input title
-        $slugify = new Slugify();
-        $slug = $slugify->slugify($data['title']);
 
         // file upload
         $uploadedFiles = $request->getUploadedFiles();
@@ -65,11 +110,11 @@ class CreateBlogPostController
         }
 
         $thumbnailFullPath = $this->baseUrl . 'uploads/' . $filename;
-
+        $id = uniqid('post_');
         $post = new Post(
             $id,
             $data['title'],
-            $slug,
+            $this->slugify($data['title']),
             $data['content'],
             $thumbnailFullPath,
             $data['author'],
@@ -85,7 +130,7 @@ class CreateBlogPostController
             'data' => [
                 'id' => $id,
                 'name' => $data['title'],
-                'slug' => $slug,
+                'slug' => $post->slug(),
                 'content' => $data['content'],
                 'thumbnail' => $thumbnailFullPath,
                 'author' => $data['author'],
@@ -128,5 +173,12 @@ class CreateBlogPostController
             }
         }
         return false;
+    }
+
+    public function slugify(string $title): string
+    {
+        // create slug out of the input title
+        $slugify = new Slugify();
+        return $slugify->slugify($title);
     }
 }
