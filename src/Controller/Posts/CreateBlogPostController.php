@@ -9,6 +9,7 @@ use BlogRestApi\Repository\PostRepository\PostRepositoryPdo;
 use Cocur\Slugify\Slugify;
 use DI\DependencyException;
 use DI\NotFoundException;
+use http\Env\Response;
 use JsonException;
 use Laminas\Diactoros\Response\JsonResponse;
 use PDO;
@@ -36,7 +37,7 @@ use OpenApi\Annotations as OA;
  *                  @OA\Property(property="categories", type="array",
  *                         @OA\Items(
  *                         type="object",
- *                         @OA\Property(property="id", type="string", format="uniqid")
+ *                         @OA\Property(property="category_id", type="string", format="uniqid", example="category_123, category_456")
  *                     )
  *                   ),
  *              )
@@ -82,15 +83,16 @@ class CreateBlogPostController
         $postCategoryRepo = new PostCategoryRepositoryPdo($this->pdo);
         $categoryRepo = new CategoryRepositoryPdo($this->pdo);
         $data = $request->getParsedBody();
-        $foundCategory = $categoryRepo->get($data['categories']);
-        if(!$foundCategory){
-            return new JsonResponse([
-                "status" => "failed",
-                "message" => "Category does not exist. Try something else.",
-                "status-code" => 404
-            ], 404);
+        $categories = explode(", ", $data['categories']);
+        foreach ($categories as $category){
+            if(!isset($categoryRepo->get($category)['category_id'])){
+                return new JsonResponse([
+                    "status" => "failed",
+                    "message" => "bad category input",
+                    "status-code" => "400"
+                ], 400);
+            }
         }
-
 
         if($this->duplicatedTitle($this->postRepository, $data['title'])){
             return new JsonResponse([
@@ -119,11 +121,11 @@ class CreateBlogPostController
             $thumbnailFullPath,
             $data['author'],
             NULL,
-            $data['categories']
+            $categories
         );
 
         $id = $this->postRepository->store($post);
-        $cat = $postCategoryRepo->store($post);
+        $postCategoryRepo->store($post);
 
         $res = [
             'status' => 'success',
@@ -135,7 +137,7 @@ class CreateBlogPostController
                 'thumbnail' => $thumbnailFullPath,
                 'author' => $data['author'],
                 'posted_at' => $post->postedAt()->format('Y-m-d H:i:s'),
-                'categories' => $cat
+                'categories' => $categories
             ],
             'status_code' => 201
         ];

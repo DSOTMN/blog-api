@@ -34,34 +34,46 @@ class PostRepositoryPdo implements PostRepository
     {
         $stmt = $this->connection->prepare(<<<SQL
             SELECT posts.*, categories.*
-            FROM posts_categories
+            FROM posts
+            JOIN posts_categories
+            ON posts.post_id = posts_categories.id_post
             JOIN categories
             ON posts_categories.id_category = categories.category_id
-            LEFT JOIN posts
-            ON posts_categories.id_post = posts.post_id
             WHERE posts.slug = :slug
         SQL);
         $stmt->bindParam(':slug', $slug);
         $stmt->execute();
 
-        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $post = [];
         if(!$result){
-            return $post = [];
+            return $post;
         }
 
-        return [
-            'id' => $result['post_id'],
-            'title' => $result['title'],
-            'slug' => $result['slug'],
-            'content' => $result['content'],
-            'thumbnail' => $result['thumbnail'],
-            'author' => $result['author'],
-            'posted_at' => $result['posted_at'],
-            'categories' => [
-                'id' => $result['category_id'],
-                'name' => $result['name'],
-            ]
-        ];
+        $categories = [];
+
+        foreach ($result as $row) {
+            if (!isset($post['id'])) {
+                $post = [
+                    'id' => $row['post_id'],
+                    'title' => $row['title'],
+                    'slug' => $row['slug'],
+                    'content' => $row['content'],
+                    'thumbnail' => $row['thumbnail'],
+                    'author' => $row['author'],
+                    'posted_at' => $row['posted_at']
+                ];
+            }
+
+            $categories[] = [
+                'id' => $row['category_id'],
+                'name' => $row['name'],
+                'description' => $row['description']
+            ];
+        }
+
+        $post['categories'] = $categories;
+        return $post;
     }
 
     public function all(): array
@@ -71,7 +83,7 @@ class PostRepositoryPdo implements PostRepository
         JOIN categories
         ON posts_categories.id_category = categories.category_id
         JOIN posts
-        ON posts_categories.id_post = posts.post_id                 
+        ON posts_categories.id_post = posts.post_id
         SQL);
 
         $stmt->execute();
@@ -87,7 +99,7 @@ class PostRepositoryPdo implements PostRepository
                 'thumbnail' => $row['thumbnail'],
                 'author' => $row['author'],
                 'posted_at' => $row['posted_at'],
-                'categories' => [
+                'category' => [
                     'id' => $row['id_category'],
                     'name' => $row['name']
                 ]
