@@ -10,10 +10,10 @@ $container->set('settings', static function(){
             'domain' => $_ENV['APP_URL'] ?? 'localhost'
         ],
         'db' => [
-            'host' => 'localhost',
-            'dbname' => 'blog_api',
-            'user' => 'root',
-            'pass' => ''
+            'host' => $_ENV['DB_HOST'] ?? 'localhost',
+            'dbname' => $_ENV['DB_NAME'] ?? 'blog_posts_api',
+            'user' => $_ENV['DB_USER'] ?? 'root',
+            'pass' => $_ENV['DB_PASS'] ?? ''
         ]
     ];
 });

@@ -11,7 +11,7 @@ class HomeController
     public function __invoke(Request $request, Response $response): JsonResponse
     {
         $data = [
-            'app' => 'module-4-project',
+            'app' => 'blog-posts-rest-api',
             'version' => '1.0'
         ];
 
