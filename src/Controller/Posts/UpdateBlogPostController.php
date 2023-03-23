@@ -4,6 +4,8 @@ namespace BlogRestApi\Controller\Posts;
 
 use BlogRestApi\Repository\PostRepository\PostRepositoryPdo;
 use DI\Container;
+use DI\DependencyException;
+use DI\NotFoundException;
 use Laminas\Diactoros\Response\JsonResponse;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
@@ -12,8 +14,8 @@ use Psr\Http\Message\UploadedFileInterface;
 use OpenApi\Annotations as OA;
 
 /**
- * @OA\Post(
- *     path="/v1/blog/posts/update/{slug}",
+ * @OA\Put(
+ *     path="/v1/blog/posts/{slug}",
  *     description="Updates a single post by its slug",
  *     tags={"Blog Posts"},
  *     @OA\Parameter(
@@ -30,11 +32,11 @@ use OpenApi\Annotations as OA;
  *          description="Updating a single post.",
  *          required=true,
  *          @OA\MediaType(
- *              mediaType="multipart/form-data",
+ *              mediaType="application/json",
  *              @OA\Schema(
  *                  @OA\Property(property="title", type="string", example="My New Blog Post"),
  *                  @OA\Property(property="content", type="string", example="Lorem Ipsum Dolorem"),
- *                  @OA\Property(property="thumbnail", type="string"),
+ *                  @OA\Property(property="thumbnail", type="string", example="C:/Users/User/image-2.jpg"),
  *              )
  *          )
  *     ),
@@ -59,6 +61,10 @@ class UpdateBlogPostController
     private string $fileUploadDirectory;
     private string $baseUrl;
 
+    /**
+     * @throws NotFoundException
+     * @throws DependencyException
+     */
     public function __construct(Container $container)
     {
         $this->pdo = $container->get('db');
@@ -68,28 +74,25 @@ class UpdateBlogPostController
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response, array $args):ResponseInterface
     {
-        $data = $request->getParsedBody();
+        $data = json_decode($request->getBody()->getContents(), true);
         $repository = new PostRepositoryPdo($this->pdo);
         $slug = $args['slug'];
 
         $post = $repository->get($slug);
-        $uploadedFiles = $request->getUploadedFiles();
 
         if (!$post) {
             return new JsonResponse("Post not found, try again.", 404);
         }
-        if (!$data['title'] || !$data['content'] || !$uploadedFiles) {
+        if (!$data['title'] || !$data['content'] || !$data['thumbnail']) {
             return new JsonResponse("Bad input. Try again!", 400);
         }
 
-        // handle single input with single file upload
-        $uploadedFile = $uploadedFiles['thumbnail'];
-        if ($uploadedFile->getError() === UPLOAD_ERR_OK) {
-            $filename = $this->moveUploadedFile($this->fileUploadDirectory, $uploadedFile);
-            $response->getBody()->write('Uploaded: ' . $filename . '<br/>');
-        }
-
-        $data['thumbnail'] = $this->baseUrl . 'uploads/' . $filename;
+        $thumbnail = file_get_contents($data['thumbnail']);
+        $ext = substr(strrchr($data['thumbnail'], '.'), 0);
+        $fileName = uniqid('image_', false) . $ext;
+        $b64 = base64_encode($thumbnail);
+        file_put_contents($this->fileUploadDirectory . $fileName, base64_decode($b64));
+        $data['thumbnail'] = $this->baseUrl . 'uploads/' . $fileName;
 
         $repository->update($slug, $data);
         $res = [

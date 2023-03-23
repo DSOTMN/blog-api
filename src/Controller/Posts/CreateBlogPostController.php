@@ -28,16 +28,16 @@ use OpenApi\Annotations as OA;
  *          description="Post to be created",
  *          required=true,
  *          @OA\MediaType(
- *              mediaType="multipart/form-data",
+ *              mediaType="application/json",
  *              @OA\Schema(
  *                  @OA\Property(property="title", type="string", example="My New Blog Post"),
  *                  @OA\Property(property="content", type="string", example="Lorem Ipsum Dolorem"),
- *                  @OA\Property(property="thumbnail", type="string"),
+ *                  @OA\Property(property="thumbnail", type="string", example="C:/Users/User/image.jpg"),
  *                  @OA\Property(property="author", type="string", example="My Name"),
  *                  @OA\Property(property="categories", type="array",
  *                         @OA\Items(
  *                         type="object",
- *                         @OA\Property(property="category_id", type="string", format="uniqid", example="category_123, category_456")
+ *                         @OA\Property(property="category_id", type="string", example="category_123, category_456")
  *                     )
  *                   ),
  *              )
@@ -82,7 +82,9 @@ class CreateBlogPostController
     {
         $postCategoryRepo = new PostCategoryRepositoryPdo($this->pdo);
         $categoryRepo = new CategoryRepositoryPdo($this->pdo);
-        $data = $request->getParsedBody();
+        $data = json_decode($request->getBody()->getContents(), true);
+
+
         $categories = explode(", ", $data['categories']);
         foreach ($categories as $category){
             if(!isset($categoryRepo->get($category)['category_id'])){
@@ -101,17 +103,16 @@ class CreateBlogPostController
                 "status-code" => "400"
             ], 400);
         }
+        $thumbnail = file_get_contents($data['thumbnail']);
+        $ext = substr(strrchr($data['thumbnail'], '.'), 0);
+        $fileName = uniqid('image_', false) . $ext;
 
-        // file upload
-        $uploadedFiles = $request->getUploadedFiles();
-        // handle single input with single file upload
-        $uploadedFile = $uploadedFiles['thumbnail'];
-        if ($uploadedFile->getError() === UPLOAD_ERR_OK) {
-            $filename = $this->moveUploadedFile($this->fileUploadDirectory, $uploadedFile);
-            $response->getBody()->write('Uploaded: ' . $filename . '<br/>');
-        }
 
-        $thumbnailFullPath = $this->baseUrl . 'uploads/' . $filename;
+        $b64 = base64_encode($thumbnail);
+
+        file_put_contents($this->fileUploadDirectory . $fileName, base64_decode($b64));
+        $thumbnailFullPath = $this->baseUrl . 'uploads/' . $fileName;
+
         $id = uniqid('post_');
         $post = new Post(
             $id,
@@ -143,30 +144,7 @@ class CreateBlogPostController
         ];
         return new JsonResponse($res, 201);
     }
-
-    /**
-     * Moves the uploaded file to the upload directory and assigns it a unique name
-     * to avoid overwriting an existing uploaded file.
-     *
-     * @param string $directory The directory to which the file is moved
-     * @param UploadedFileInterface $uploadedFile The file uploaded file to move
-     *
-     * @return string The filename of moved file
-     */
-    public function moveUploadedFile(string $directory, UploadedFileInterface $uploadedFile): string
-    {
-        $extension = pathinfo($uploadedFile->getClientFilename(), PATHINFO_EXTENSION);
-
-        // see http://php.net/manual/en/function.random-bytes.php
-        $basename = bin2hex(random_bytes(8));
-        $filename = sprintf('%s.%0.8s', $basename, $extension);
-
-        $uploadedFile->moveTo($directory . DIRECTORY_SEPARATOR . $filename);
-
-        return $filename;
-    }
-
-    public function duplicatedTitle(PostRepositoryPdo $postRepository, string $title): bool
+    private function duplicatedTitle(PostRepositoryPdo $postRepository, string $title): bool
     {
         $posts = $postRepository->all();
         foreach($posts as $post){
@@ -177,10 +155,11 @@ class CreateBlogPostController
         return false;
     }
 
-    public function slugify(string $title): string
+    private function slugify(string $title): string
     {
         // create slug out of the input title
         $slugify = new Slugify();
         return $slugify->slugify($title);
     }
+
 }

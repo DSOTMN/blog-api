@@ -31,7 +31,7 @@ $app->post('/v1/blog/posts', CreateBlogPostController::class);
 $app->get('/v1/blog/posts', GetAllPostsController::class);
 $app->get('/v1/blog/posts/{slug}', GetSinglePostController::class);
 $app->delete('/v1/blog/posts/{slug}', DeleteSinglePostController::class);
-$app->post('/v1/blog/posts/update/{slug}', UpdateBlogPostController::class);
+$app->put('/v1/blog/posts/{slug}', UpdateBlogPostController::class);
 
 // Categories
 $app->post('/v1/blog/categories', CreateCategoryController::class);
