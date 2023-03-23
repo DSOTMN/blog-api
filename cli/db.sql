@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS posts(
     post_id VARCHAR(255) NOT NULL PRIMARY KEY,
-    title VARCHAR(50) NOT NULL,
-    slug VARCHAR(50) NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    slug VARCHAR(255) NOT NULL,
     content VARCHAR(300) NOT NULL,
-    thumbnail VARCHAR(50) NOT NULL,
+    thumbnail VARCHAR(255) NOT NULL,
     author VARCHAR(50) NOT NULL,
     posted_at DATETIME NOT NULL
 
