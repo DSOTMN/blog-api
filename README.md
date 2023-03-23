@@ -9,8 +9,6 @@ It has CRUD functionalities for, both, posts and categories, which have the many
 - [ ] PHP ^8.1
 - [ ] MySQL/MariaDB
 - [ ] Composer
-- [ ] File Upload enabled in php.ini
-
 
 ### Usage
 

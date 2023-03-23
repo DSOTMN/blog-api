@@ -108,26 +108,4 @@ class UpdateBlogPostController
 
         return new JsonResponse($res, 200);
     }
-
-    /**
-     * Moves the uploaded file to the upload directory and assigns it a unique name
-     * to avoid overwriting an existing uploaded file.
-     *
-     * @param string $directory The directory to which the file is moved
-     * @param UploadedFileInterface $uploadedFile The file uploaded file to move
-     *
-     * @return string The filename of moved file
-     */
-    private function moveUploadedFile(string $directory, UploadedFileInterface $uploadedFile): string
-    {
-        $extension = pathinfo($uploadedFile->getClientFilename(), PATHINFO_EXTENSION);
-
-        // see http://php.net/manual/en/function.random-bytes.php
-        $basename = bin2hex(random_bytes(8));
-        $filename = sprintf('%s.%0.8s', $basename, $extension);
-
-        $uploadedFile->moveTo($directory . DIRECTORY_SEPARATOR . $filename);
-
-        return $filename;
-    }
 }
